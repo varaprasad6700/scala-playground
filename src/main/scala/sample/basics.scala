@@ -14,16 +14,16 @@ object basics extends App {
 
   //  4. Write a function that takes an int value and returns true if it’s a prime number, otherwise false.
   def isPrime(num: Int): Boolean = {
-    if (num == 2)
-      return true
-    else if (num < 2 || num % 2 == 0)
-      return false
-    for (i <- 3 to math.sqrt(num).toInt + 1 by 2) {
-      if (num % i == 0) {
-        return false
+    if (num == 2) true
+    else if (num < 2 || num % 2 == 0) false
+    else {
+      for (i <- 3 to math.sqrt(num).toInt + 1 by 2) {
+        if (num % i == 0) {
+          return false
+        }
       }
+      true
     }
-    true
   }
 
   //  5. Write a function that takes an int value and returns factorial of it using while loop.
@@ -40,10 +40,8 @@ object basics extends App {
   //  6. Perform (3) using tail recursion.
   @tailrec
   def factorial(num: Int, acc: Long): Long = {
-    if (num == 0) {
-      return acc
-    }
-    factorial(num - 1, acc * num)
+    if (num == 0) acc
+    else factorial(num - 1, acc * num)
   }
 
 
