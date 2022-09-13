@@ -11,7 +11,7 @@ object part2 extends App {
   def map(values: List[Int], f: Int => Int, result: List[Int] = List.empty[Int]): List[Int] = {
     if (values.isEmpty) result
     else map(
-      values.takeRight(values.size - 1), // can use indexing instead of takeRight everytime
+      values.tail, // can use indexing or values.takeRight(size-1)
       f,
       result.appendedAll(List(f(values.head)))
     )
@@ -22,7 +22,7 @@ object part2 extends App {
   def flatMap(values: List[Int], f: Int => List[Int], result: List[Int] = List.empty[Int]): List[Int] = {
     if (values.isEmpty) result
     else flatMap(
-      values.takeRight(values.size - 1),
+      values.tail,
       f,
       result.appendedAll(f(values.head))
     )
@@ -33,7 +33,7 @@ object part2 extends App {
   def filter(values: List[Int], f: Int => Boolean, result: List[Int] = List.empty[Int]): List[Int] = {
     if (values.isEmpty) result
     else filter(
-      values.takeRight(values.size - 1),
+      values.tail,
       f,
       if (f(values.head)) result.appendedAll(List(values.head)) else result
     )
@@ -45,7 +45,7 @@ object part2 extends App {
     if (acc.isEmpty && values.isEmpty) throw new UnsupportedOperationException
     else if (values.isEmpty) acc.get
     else reduceLeft(
-      values.takeRight(values.size - 1),
+      values.tail,
       f,
       Option(f(acc.get, values.head))
     )
@@ -56,7 +56,7 @@ object part2 extends App {
   def foldLeft(values: List[Int], initialValue: Int, f: (Int, Int) => Int, acc: Option[Int] = None): Int = {
     if (values.isEmpty) acc.getOrElse(initialValue)
     else foldLeft(
-      values.takeRight(values.size - 1),
+      values.tail,
       initialValue,
       f,
       Option(f(acc.getOrElse(initialValue), values.head))
