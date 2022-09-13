@@ -21,3 +21,4 @@ project/plugins/project/
 .bloop
 project
 .vscode
+.bsp/sbt.json
