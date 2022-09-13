@@ -17,3 +17,7 @@ project/plugins/project/
 *.log
 
 .idea
+.metals
+.bloop
+project
+.vscode

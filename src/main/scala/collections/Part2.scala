@@ -4,7 +4,9 @@ package collections
 import scala.annotation.tailrec
 
 object Part2 extends App {
-//  PART 2
+  //  PART 2
+
+  val numbers = List(1, 2, 3, 4, 5)
 
   //  1. Implement map using tail recursion - def map(values: List[Int], f: Int => Int): List[Int]
   @tailrec
@@ -17,7 +19,17 @@ object Part2 extends App {
     )
   }
 
-  def map_v2
+  def map_v2(values: List[Int], f: Int => Int): List[Int] = {
+    @tailrec
+    def loop(rem: List[Int], acc: List[Int] = List.empty[Int]): List[Int] = {
+      rem.headOption match {
+        case None => acc
+        case Some(head) => loop(rem.tail, f(head) :: acc)
+      }
+    }
+
+    loop(values).reverse
+  }
 
   //  2. Implement flatMap using tail recursion - def map(values: List[Int], f: Int => List[Int]): List[Int]
   @tailrec
@@ -28,6 +40,18 @@ object Part2 extends App {
       f,
       result.appendedAll(f(values.head))
     )
+  }
+
+  def flatMap_v2(values: List[Int], f: Int => List[Int]): List[Int] = {
+    @tailrec
+    def loop(rem: List[Int], acc: List[Int] = List.empty[Int]): List[Int] = {
+      rem.headOption match {
+        case None => acc
+        case Some(head) => loop(rem.tail, f(head) ::: acc)
+      }
+    }
+
+    loop(values).reverse
   }
 
   //  3. Implement filter using tail recursion - def filter(values: List[Int], f: Int => Boolean): List[Int]]
@@ -50,7 +74,8 @@ object Part2 extends App {
         case _ => loop(rem.tail, acc)
       }
     }
-    loop(values)
+
+    loop(values).reverse
   }
 
   //  4. Implement reduceLeft using tail recursion - def reduceLeft(values: List[Int], f: (Int, Int) => Int): Int
@@ -61,19 +86,7 @@ object Part2 extends App {
     else reduceLeft(
       values.tail,
       f,
-      Option(f(acc.get, values.head))
-    )
-  }
-
-  //  5. Implement foldLeft using tail recursion - def foldLeft(values: List[Int], initialValue: Int, f: (Int, Int) => Int): Int
-  @tailrec
-  def foldLeft(values: List[Int], initialValue: Int, f: (Int, Int) => Int, acc: Option[Int] = None): Int = {
-    if (values.isEmpty) acc.getOrElse(initialValue)
-    else foldLeft(
-      values.tail,
-      initialValue,
-      f,
-      Option(f(acc.getOrElse(initialValue), values.head))
+      if (acc.isEmpty) Option(values.head) else Option(f(acc.get, values.head))
     )
   }
 
@@ -90,6 +103,18 @@ object Part2 extends App {
     loop(values, None)
   }
 
+  //  5. Implement foldLeft using tail recursion - def foldLeft(values: List[Int], initialValue: Int, f: (Int, Int) => Int): Int
+  @tailrec
+  def foldLeft(values: List[Int], initialValue: Int, f: (Int, Int) => Int, acc: Option[Int] = None): Int = {
+    if (values.isEmpty) acc.getOrElse(initialValue)
+    else foldLeft(
+      values.tail,
+      initialValue,
+      f,
+      Option(f(acc.getOrElse(initialValue), values.head))
+    )
+  }
+
   def foldLeft_v2(values: List[Int], initialValue: Int, f: (Int, Int) => Int): Option[Int] = {
     @tailrec
     def loop(rem: List[Int], acc: Option[Int] = None): Option[Int] = {
@@ -103,9 +128,14 @@ object Part2 extends App {
     loop(values, Some(initialValue))
   }
 
-
-  val numbers = List(1, 2, 3, 4, 5)
   println(map(numbers, _ * 2))
+  println(map_v2(numbers, _ * 2))
   println(flatMap(numbers, List.fill(2)(_)))
+  println(flatMap_v2(numbers, List.fill(2)(_)))
   println(filter(numbers, _ % 2 == 0))
+  println(filter_v2(numbers, _ % 2 == 0))
+  println(reduceLeft(numbers, _ + _))
+  println(reduceLeft_v2(numbers, _ + _))
+  println(foldLeft(numbers, 1, _ * _))
+  println(foldLeft_v2(numbers, 1, _ * _))
 }
