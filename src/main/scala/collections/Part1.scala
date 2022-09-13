@@ -2,7 +2,7 @@ package com.techsophy
 package collections
 
 
-object part1 extends App {
+object Part1 extends App {
   //  1. Sum of all the numbers in the list
   val numbers = List(1, 2, 3, 4, 5)
   println(numbers.fold(0)((v1: Int, v2: Int) => v1 + v2))
@@ -38,4 +38,8 @@ object part1 extends App {
 
   //  3. Second minimum element from a list
   print(numbers.sorted.lift(1))
+
+//  val (maxFreqToken, maxFreq) = wordFrequency.maxBy(_._2)
+//  wordFrequency.map {case (token, freq) => (token, freq / maxFreq)}
+//  wordFrequency.view.mapValues(_ / maxFreq)
 }

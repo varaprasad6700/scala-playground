@@ -3,7 +3,7 @@ package collections
 
 import scala.annotation.tailrec
 
-object part2 extends App {
+object Part2 extends App {
 //  PART 2
 
   //  1. Implement map using tail recursion - def map(values: List[Int], f: Int => Int): List[Int]
@@ -16,6 +16,8 @@ object part2 extends App {
       result.appendedAll(List(f(values.head)))
     )
   }
+
+  def map_v2
 
   //  2. Implement flatMap using tail recursion - def map(values: List[Int], f: Int => List[Int]): List[Int]
   @tailrec
@@ -37,6 +39,18 @@ object part2 extends App {
       f,
       if (f(values.head)) result.appendedAll(List(values.head)) else result
     )
+  }
+
+  def filter_v2(values: List[Int], f: Int => Boolean): List[Int] = {
+    @tailrec
+    def loop(rem: List[Int], acc: List[Int] = List.empty[Int]): List[Int] = {
+      rem.headOption match {
+        case None => acc
+        case Some(head) if f(head) => loop(rem.tail, head :: acc)
+        case _ => loop(rem.tail, acc)
+      }
+    }
+    loop(values)
   }
 
   //  4. Implement reduceLeft using tail recursion - def reduceLeft(values: List[Int], f: (Int, Int) => Int): Int
@@ -61,6 +75,32 @@ object part2 extends App {
       f,
       Option(f(acc.getOrElse(initialValue), values.head))
     )
+  }
+
+  def reduceLeft_v2(values: List[Int], f: (Int, Int) => Int): Option[Int] = {
+    @tailrec
+    def loop(rem: List[Int], acc: Option[Int] = None): Option[Int] = {
+      (rem.headOption, acc) match {
+        case (Some(head), Some(reduced)) => loop(rem.tail, Some(f(head, reduced)))
+        case (Some(head), None) => loop(rem.tail, Some(head))
+        case _ => acc
+      }
+    }
+
+    loop(values, None)
+  }
+
+  def foldLeft_v2(values: List[Int], initialValue: Int, f: (Int, Int) => Int): Option[Int] = {
+    @tailrec
+    def loop(rem: List[Int], acc: Option[Int] = None): Option[Int] = {
+      (rem.headOption, acc) match {
+        case (Some(head), Some(reduced)) => loop(rem.tail, Some(f(head, reduced)))
+        case (Some(head), None) => loop(rem.tail, Some(head))
+        case _ => acc
+      }
+    }
+
+    loop(values, Some(initialValue))
   }
 
 
