@@ -17,7 +17,7 @@ object Part3 extends App {
       }
     }
 
-    loop(values)
+    loop(values).reverse
   }
 
   //  2. Implement generic flatMap using tail recursion - def flatMap[A, B](values: List[A], f: A => List[B]): List[B]

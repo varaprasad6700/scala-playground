@@ -1,6 +1,8 @@
 package com.techsophy
 package collections
 
+import scala.annotation.tailrec
+
 
 object Part1 extends App {
   //  1. Sum of all the numbers in the list
@@ -27,19 +29,39 @@ object Part1 extends App {
   println(wordFrequency)
 
   //    e. Find max frequency token.
-  val maxFreqToken = wordFrequency.toList
-    .sortBy(_._2)(Ordering.Int.reverse)
-    .head
-  println(maxFreqToken._1)
+//  val maxFreqToken = wordFrequency.toList
+//    .sortBy(_._2)(Ordering.Int.reverse)
+//    .head
+  val (maxFreqToken, maxFreq) = wordFrequency.maxBy(_._2)
+  println(maxFreqToken)
 
   //    f. For the Map generated in (4), divide their frequency by max value.
-  println(wordFrequency.map((tuple: (String, Int)) => (tuple._1, tuple._2 / maxFreqToken._2)))
+  println(wordFrequency.map((tuple: (String, Int)) => (tuple._1, tuple._2 / maxFreq)))
+  println(wordFrequency.map {case (token, freq) => (token, freq / maxFreq)})
+  println(wordFrequency.view.mapValues(_ / maxFreq).toMap)
+
 
 
   //  3. Second minimum element from a list
-  print(numbers.sorted.lift(1))
+  def secondMin(l: List[Int]): Option[Int] = {
+    @tailrec
+    def loop(rem: List[Int], min: Option[Int] = None, secondMin: Option[Int] = None): Option[Int] = {
+      (rem.headOption, min, secondMin) match {
+        case (Some(head), Some(m1), _) if head < m1                        => loop(rem.tail, rem.headOption, min)
+        case (Some(head), Some(m1), None) if head != m1                    => loop(rem.tail, min, rem.headOption)
+        case (Some(head), Some(m1), Some(m2)) if (head < m2 && head != m1) => loop(rem.tail, min, rem.headOption)
+        case (Some(_), None, _)                                            => loop(rem.tail, rem.headOption, min)
+        case (None, _, _)                                                  => secondMin
+        case _                                                             => loop(rem.tail, min, secondMin)
+      }
+    }
 
-//  val (maxFreqToken, maxFreq) = wordFrequency.maxBy(_._2)
-//  wordFrequency.map {case (token, freq) => (token, freq / maxFreq)}
-//  wordFrequency.view.mapValues(_ / maxFreq)
+    loop(l)
+  }
+
+
+  println(secondMin(numbers))
+  println(secondMin(List(111, 13, 25, 9, 34, 1)))
+  println(secondMin(List(12, 13, 1, 10, 34, 1)))
+  println(secondMin(List(1, 1, 1, 1)))
 }
