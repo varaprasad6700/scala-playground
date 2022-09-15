@@ -29,17 +29,16 @@ object Part1 extends App {
   println(wordFrequency)
 
   //    e. Find max frequency token.
-//  val maxFreqToken = wordFrequency.toList
-//    .sortBy(_._2)(Ordering.Int.reverse)
-//    .head
+  //  val maxFreqToken = wordFrequency.toList
+  //    .sortBy(_._2)(Ordering.Int.reverse)
+  //    .head
   val (maxFreqToken, maxFreq) = wordFrequency.maxBy(_._2)
   println(maxFreqToken)
 
   //    f. For the Map generated in (4), divide their frequency by max value.
   println(wordFrequency.map((tuple: (String, Int)) => (tuple._1, tuple._2 / maxFreq)))
-  println(wordFrequency.map {case (token, freq) => (token, freq / maxFreq)})
+  println(wordFrequency.map { case (token, freq) => (token, freq / maxFreq) })
   println(wordFrequency.view.mapValues(_ / maxFreq).toMap)
-
 
 
   //  3. Second minimum element from a list
@@ -47,12 +46,38 @@ object Part1 extends App {
     @tailrec
     def loop(rem: List[Int], min: Option[Int] = None, secondMin: Option[Int] = None): Option[Int] = {
       (rem.headOption, min, secondMin) match {
-        case (Some(head), Some(m1), _) if head < m1                        => loop(rem.tail, rem.headOption, min)
-        case (Some(head), Some(m1), None) if head != m1                    => loop(rem.tail, min, rem.headOption)
+        case (Some(head), Some(m1), _) if head < m1 => loop(rem.tail, rem.headOption, min)
+        case (Some(head), Some(m1), None) if head != m1 => loop(rem.tail, min, rem.headOption)
         case (Some(head), Some(m1), Some(m2)) if (head < m2 && head != m1) => loop(rem.tail, min, rem.headOption)
-        case (Some(_), None, _)                                            => loop(rem.tail, rem.headOption, min)
-        case (None, _, _)                                                  => secondMin
-        case _                                                             => loop(rem.tail, min, secondMin)
+        case (Some(_), None, _) => loop(rem.tail, rem.headOption, min)
+        case (None, _, _) => secondMin
+        case _ => loop(rem.tail, min, secondMin)
+      }
+    }
+
+    loop(l)
+  }
+
+  def secondMin_v2(l: List[Int]): Option[Int] = {
+    @tailrec
+    def loop(rem: List[Int], min: Option[Int] = None, secondMin: Option[Int] = None): Option[Int] = {
+      rem.headOption match {
+        case None => secondMin
+        case Some(head) =>
+          (min, secondMin) match {
+            case (Some(m1), Some(m2)) =>
+              if (head < m1)
+                loop(rem.tail, Some(head), Some(m1))
+              else {
+                val mini = Math.min(m2, head)
+                loop(rem.tail, Some(m1), Some(mini))
+              }
+            case (Some(m1), None) =>
+              val mini = Math.min(head, m1)
+              val maxi = Math.max(head, m1)
+              loop(rem.tail, Some(mini), Some(maxi))
+            case (None, None) => loop(rem.tail, Some(head), secondMin)
+          }
       }
     }
 
@@ -64,4 +89,9 @@ object Part1 extends App {
   println(secondMin(List(111, 13, 25, 9, 34, 1)))
   println(secondMin(List(12, 13, 1, 10, 34, 1)))
   println(secondMin(List(1, 1, 1, 1)))
+
+  println(secondMin_v2(numbers))
+  println(secondMin_v2(List(111, 13, 25, 9, 34, 1)))
+  println(secondMin_v2(List(12, 13, 1, 10, 34, 1)))
+  println(secondMin_v2(List(1, 1, 1, 1)))
 }
