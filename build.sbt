@@ -7,3 +7,7 @@ lazy val root = (project in file("."))
     name := "playground",
     idePackagePrefix := Some("com.techsophy")
   )
+libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % "3.3.0",
+  "org.apache.spark" %% "spark-sql" % "3.3.0"
+)
