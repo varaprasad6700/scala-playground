@@ -128,14 +128,14 @@ object Part2 extends App {
     loop(values, Some(initialValue))
   }
 
-  println(map(numbers, _ * 2))
+  println(map(numbers, x => x * 2))
   println(map_v2(numbers, _ * 2))
-  println(flatMap(numbers, List.fill(2)(_)))
+  println(flatMap(numbers, x => List.fill(2)(x)))
   println(flatMap_v2(numbers, List.fill(2)(_)))
-  println(filter(numbers, _ % 2 == 0))
+  println(filter(numbers, x => x % 2 == 0))
   println(filter_v2(numbers, _ % 2 == 0))
-  println(reduceLeft(numbers, _ + _))
+  println(reduceLeft(numbers, (x, y) => x + y))
   println(reduceLeft_v2(numbers, _ + _))
-  println(foldLeft(numbers, 1, _ * _))
+  println(foldLeft(numbers, 1, (x, y) => x * y))
   println(foldLeft_v2(numbers, 1, _ * _))
 }
