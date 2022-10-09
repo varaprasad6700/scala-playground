@@ -2,10 +2,10 @@ package com.techsophy
 package sample
 
 import org.apache.spark.sql.functions.{array_contains, col, split}
-import org.apache.spark.sql.types.{ArrayType, IntegerType, LongType, StringType, StructField, StructType}
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object SparkTask extends App {
+object SparkTaskOne extends App {
   val spark: SparkSession = SparkSession.builder()
     .master("local[8]")
     .appName("Task")
@@ -52,7 +52,7 @@ object SparkTask extends App {
     .option("inferSchema", value = false)
     .option("nullValue", "\\N")
     .schema(basicDataSchema)
-    .csv("/home/prasad/Downloads/imdb dataset/title.basics.tsv/data.tsv")
+    .csv("D:\\imdb datasets\\title.basics.tsv\\data.tsv")
 
   val akasData: DataFrame = spark.read
     .option("delimiter", "\t")
@@ -60,7 +60,7 @@ object SparkTask extends App {
     .option("inferSchema", value = false)
     .option("nullValue", "\\N")
     .schema(akasDataSchema)
-    .csv("/home/prasad/Downloads/imdb dataset/title.akas.tsv/data.tsv")
+    .csv("D:\\imdb datasets\\title.akas.tsv\\data.tsv")
 
   val crewData: DataFrame = spark.read
     .option("delimiter", "\t")
@@ -68,7 +68,7 @@ object SparkTask extends App {
     .option("inferSchema", value = false)
     .option("nullValue", "\\N")
     .schema(crewDataSchema)
-    .csv("/home/prasad/Downloads/imdb dataset/title.crew.tsv/data.tsv")
+    .csv("D:\\imdb datasets\\title.crew.tsv\\data.tsv")
 
   val crewNamesDataSchema = StructType(
     List(
@@ -87,7 +87,7 @@ object SparkTask extends App {
     .option("inferSchema", value = false)
     .option("nullValue", "\\N")
     .schema(crewNamesDataSchema)
-    .csv("/home/prasad/Downloads/imdb dataset/name.basics.tsv/data.tsv")
+    .csv("D:\\imdb datasets\\name.basics.tsv\\data.tsv")
 
   val modifiedCrewData = crewData
     .withColumn("directors", split(col("directors"), ","))
@@ -102,14 +102,13 @@ object SparkTask extends App {
   akasData.printSchema
 
   modifiedCrewData.printSchema
-
-  val joinedFrame: DataFrame = basicData.filter(col("startYear").geq(2010).and(col("endYear").leq(2020)))
+  val joinedFrame: DataFrame = basicData
+    .filter(col("titleType").eqNullSafe("tvSeries").and(col("startYear").geq(2010)).and(col("endYear").leq(2020)))
     .join(akasData, basicData.col("tconst") === akasData.col("titleId"), "left_outer")
     .join(modifiedCrewData, basicData.col("tconst") === crewData.col("tconst"), "left_outer")
     .join(crewNamesData, array_contains(modifiedCrewData.col("directors"), crewNamesData.col("nconst")))
-    .select(col("title"), col("genres"), col("primaryName").as("directoryName"))
+    .select(col("title"), col("genres"), col("primaryName").as("directorName"))
 
-  joinedFrame.write.csv("a.csv")
   joinedFrame.show()
   Thread.sleep(60 * 60 * 1000)
 }
