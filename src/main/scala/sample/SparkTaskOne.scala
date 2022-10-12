@@ -1,8 +1,9 @@
 package com.techsophy
 package sample
 
-import org.apache.spark.sql.functions.{array_contains, col, split}
-import org.apache.spark.sql.types._
+import sample.Schemas._
+
+import org.apache.spark.sql.functions.{array_contains, col, explode, lit, split}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object SparkTaskOne extends App {
@@ -11,104 +12,38 @@ object SparkTaskOne extends App {
     .appName("Task")
     .getOrCreate()
 
-  val basicDataSchema = StructType(
-    List(
-      StructField("tconst", StringType, nullable = false),
-      StructField("titleType", StringType, nullable = true),
-      StructField("primaryTitle", StringType, nullable = true),
-      StructField("originalTitle", StringType, nullable = false),
-      StructField("isAdult", IntegerType, nullable = true),
-      StructField("startYear", IntegerType, nullable = true),
-      StructField("endYear", IntegerType, nullable = true),
-      StructField("runTimeMinutes", LongType, nullable = true),
-      StructField("genres", StringType, nullable = true),
-    )
-  )
-
-  val akasDataSchema = StructType(
-    List(
-      StructField("titleId", StringType, nullable = false),
-      StructField("ordering", IntegerType, nullable = true),
-      StructField("title", StringType, nullable = true),
-      StructField("region", StringType, nullable = false),
-      StructField("language", StringType, nullable = true),
-      StructField("types", StringType, nullable = true),
-      StructField("attributes", StringType, nullable = true),
-      StructField("isOriginalTitle", IntegerType, nullable = true),
-    )
-  )
-
-  val crewDataSchema = StructType(
-    List(
-      StructField("tconst", StringType, nullable = false),
-      StructField("directors", StringType, nullable = true),
-      StructField("writers", StringType, nullable = true),
-    )
-  )
-
   val basicData: DataFrame = spark.read
-    .option("delimiter", "\t")
-    .option("header", value = true)
-    .option("inferSchema", value = false)
-    .option("nullValue", "\\N")
     .schema(basicDataSchema)
-    .csv("D:\\imdb datasets\\title.basics.tsv\\data.tsv")
+    .load("/home/prasad/Downloads/imdb dataset/parquet/basic")
 
   val akasData: DataFrame = spark.read
-    .option("delimiter", "\t")
-    .option("header", value = true)
-    .option("inferSchema", value = false)
-    .option("nullValue", "\\N")
     .schema(akasDataSchema)
-    .csv("D:\\imdb datasets\\title.akas.tsv\\data.tsv")
+    .load("/home/prasad/Downloads/imdb dataset/parquet/akas")
 
   val crewData: DataFrame = spark.read
-    .option("delimiter", "\t")
-    .option("header", value = true)
-    .option("inferSchema", value = false)
-    .option("nullValue", "\\N")
     .schema(crewDataSchema)
-    .csv("D:\\imdb datasets\\title.crew.tsv\\data.tsv")
-
-  val crewNamesDataSchema = StructType(
-    List(
-      StructField("nconst", StringType, nullable = false),
-      StructField("primaryName", StringType, nullable = true),
-      StructField("birthYear", IntegerType, nullable = true),
-      StructField("deathYear", IntegerType, nullable = true),
-      StructField("primaryProfession", StringType, nullable = true),
-      StructField("knownForTitles", StringType, nullable = true),
-    )
-  )
+    .load("/home/prasad/Downloads/imdb dataset/parquet/crew")
 
   val crewNamesData: DataFrame = spark.read
-    .option("delimiter", "\t")
-    .option("header", value = true)
-    .option("inferSchema", value = false)
-    .option("nullValue", "\\N")
     .schema(crewNamesDataSchema)
-    .csv("D:\\imdb datasets\\name.basics.tsv\\data.tsv")
+    .load("/home/prasad/Downloads/imdb dataset/parquet/name")
 
   val modifiedCrewData = crewData
     .withColumn("directors", split(col("directors"), ","))
-    .withColumn("writers", split(col("writers"), ","))
+    .withColumn("directors", explode(col("directors")))
+  //    .withColumn("writers", split(col("writers"), ","))
 
-  //  basicData.filter(col("titleId").isNull).show
-  basicData.printSchema
-
-  println(basicData.count())
-
-  //  akasData.show()
-  akasData.printSchema
-
-  modifiedCrewData.printSchema
+  //tt3768572
   val joinedFrame: DataFrame = basicData
-    .filter(col("titleType").eqNullSafe("tvSeries").and(col("startYear").geq(2010)).and(col("endYear").leq(2020)))
+    .filter((col("titleType") === lit("tvSeries")) &&
+      (col("startYear") >= 2010 && col("endYear") <= 2020)
+    )
     .join(akasData, basicData.col("tconst") === akasData.col("titleId"), "left_outer")
     .join(modifiedCrewData, basicData.col("tconst") === crewData.col("tconst"), "left_outer")
-    .join(crewNamesData, array_contains(modifiedCrewData.col("directors"), crewNamesData.col("nconst")))
+    .join(crewNamesData, modifiedCrewData.col("directors") === crewNamesData.col("nconst"))
+    //    .filter(basicData("tconst") === lit("tt3768572"))
     .select(col("title"), col("genres"), col("primaryName").as("directorName"))
 
-  joinedFrame.show()
+  joinedFrame.show
   Thread.sleep(60 * 60 * 1000)
 }
